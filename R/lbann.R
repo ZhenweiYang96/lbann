@@ -19,6 +19,7 @@
 #' @examples
 #' lbann()
 #' @export
+
 lbann <- function(formula, data,
                   interaction = F,
                   num.layer, activation.1= "linear", activation.2 = "linear",
@@ -27,7 +28,7 @@ lbann <- function(formula, data,
 
   stopifnot(inherits(formula,"formula"), "Invalid type of argument: formula!")
 
-  stopifnot(!is.matrix(data) or !is.data.frame(data), "Invalid type of argument: data!")
+  stopifnot(!is.matrix(data) | !is.data.frame(data), "Invalid type of argument: data!")
 
   stopifnot(is.logical(interaction), "Invalid type of argument: interaction!")
 
