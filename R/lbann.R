@@ -25,28 +25,36 @@ lbann <- function(formula, data,
                   num.layer, activation.1= "linear", activation.2 = "linear",
                   loss.fun = "mse", epochs = 10, val_split.ratio = 0.2,
                   lr = 0.01) {
-
-  stopifnot(inherits(formula,"formula"), "Invalid type of argument: formula!")
-
-  stopifnot(!is.matrix(data) | !is.data.frame(data), "Invalid type of argument: data!")
-
-  stopifnot(is.logical(interaction), "Invalid type of argument: interaction!")
-
-  stopifnot(is.numeric(num.layer),
-            "Invalid type of argument: num.layer! num.layer can only accept a numerical value!")
-
-  stopifnot(activation.1 %in% c("linear", "relu", "softmax"), "Invalid value of activation.1!")
-
-  stopifnot(activation.2 %in% c("linear", "relu", "softmax"), "Invalid value of activation.2!")
-
-  stopifnot(loss.fun == "mse", "Invalid value of loss.fun!")
-
-  stopifnot(is.numeric(epochs), "Invalid type of argument: epochs! epochs can only accept a numerical value!")
-
-  stopifnot(is.numeric(val_split.ratio),
-            "Invalid type of argument: val_split.ratio! val_split.ratio can only accept a numerical value!")
-
-  stopifnot(is.numeric(lr), "Invalid type of argument: lr! lr can only accept a numerical value!")
+  if (!inherits(formula,"formula")) {
+    stop("Invalid type of argument: formula!")
+  }
+  if (!is.matrix(data) | !is.data.frame(data)) {
+    stop("Invalid type of argument: data!")
+  }
+  if (!is.logical(interaction)) {
+    stop("Invalid type of argument: interaction!")
+  }
+  if (!is.numeric(num.layer)) {
+    stop("Invalid type of argument: num.layer! num.layer can only accept a numerical value!")
+  }
+  if (!activation.1 %in% c("linear", "relu", "softmax")) {
+    stop("Invalid value of activation.1!")
+  }
+  if (!activation.2 %in% c("linear", "relu", "softmax")) {
+    stop("Invalid value of activation.2!")
+  }
+  if (!loss.fun == "mse") {
+    stop("Invalid value of loss.fun!")
+  }
+  if (!is.numeric(epochs)) {
+    stop("Invalid type of argument: epochs! epochs can only accept a numerical value!")
+  }
+  if (!is.numeric(val_split.ratio)) {
+    stop("Invalid type of argument: val_split.ratio! val_split.ratio can only accept a numerical value!")
+  }
+  if (!is.numeric(lr)) {
+    stop("Invalid type of argument: lr! lr can only accept a numerical value!")
+  }
 
   aux.form <- strsplit(as.character(formula), split = "~")
   response.var <- aux.form[[2]]
