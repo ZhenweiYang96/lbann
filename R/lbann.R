@@ -20,41 +20,32 @@
 #' lbann()
 #' @export
 lbann <- function(formula, data,
-                          interaction = F,
-                          num.layer, activation.1= "linear", activation.2 = "linear",
-                          loss.fun = "mse", epochs = 10, val_split.ratio = 0.2,
-                          lr = 0.01) {
+                  interaction = F,
+                  num.layer, activation.1= "linear", activation.2 = "linear",
+                  loss.fun = "mse", epochs = 10, val_split.ratio = 0.2,
+                  lr = 0.01) {
 
-  if (!inherits(formula,"formula")) {
-    stopifnot("Invalid type of argument: formula!")
-  }
-  if (!is.matrix(data) or !is.data.frame(data)) {
-    stopifnot("Invalid type of argument: data!")
-  }
-  if (!is.logical(interaction)) {
-    stopifnot("Invalid type of argument: interaction!")
-  }
-  if (!is.numeric(num.layer)) {
-    stopifnot("Invalid type of argument: num.layer! num.layer can only accept a numerical value!")
-  }
-  if (!activation.1 %in% c("linear", "relu", "softmax")) {
-    stopifnot("Invalid value of activation.1!")
-  }
-  if (!activation.2 %in% c("linear", "relu", "softmax")) {
-    stopifnot("Invalid value of activation.2!")
-  }
-  if (!loss.fun == "mse") {
-    stopifnot("Invalid value of loss.fun!")
-  }
-  if (!is.numeric(epochs)) {
-    stopifnot("Invalid type of argument: epochs! epochs can only accept a numerical value!")
-  }
-  if (!is.numeric(val_split.ratio)) {
-    stopifnot("Invalid type of argument: val_split.ratio! val_split.ratio can only accept a numerical value!")
-  }
-  if (!is.numeric(lr)) {
-    stopifnot("Invalid type of argument: lr! lr can only accept a numerical value!")
-  }
+  stopifnot(inherits(formula,"formula"), "Invalid type of argument: formula!")
+
+  stopifnot(!is.matrix(data) or !is.data.frame(data), "Invalid type of argument: data!")
+
+  stopifnot(is.logical(interaction), "Invalid type of argument: interaction!")
+
+  stopifnot(is.numeric(num.layer),
+            "Invalid type of argument: num.layer! num.layer can only accept a numerical value!")
+
+  stopifnot(activation.1 %in% c("linear", "relu", "softmax"), "Invalid value of activation.1!")
+
+  stopifnot(activation.2 %in% c("linear", "relu", "softmax"), "Invalid value of activation.2!")
+
+  stopifnot(loss.fun == "mse", "Invalid value of loss.fun!")
+
+  stopifnot(is.numeric(epochs), "Invalid type of argument: epochs! epochs can only accept a numerical value!")
+
+  stopifnot(is.numeric(val_split.ratio),
+            "Invalid type of argument: val_split.ratio! val_split.ratio can only accept a numerical value!")
+
+  stopifnot(is.numeric(lr), "Invalid type of argument: lr! lr can only accept a numerical value!")
 
   aux.form <- strsplit(as.character(formula), split = "~")
   response.var <- aux.form[[2]]
@@ -103,8 +94,8 @@ lbann <- function(formula, data,
     keras::optimizer_rmsprop(lr),
     loss = loss.fun,
     metrics = c("accuracy")
-                #tf$keras$metrics$AUC())#,
-               # tf$keras$metrics$Precision())#tf$keras$metrics$AUC()
+    #tf$keras$metrics$AUC())#,
+    # tf$keras$metrics$Precision())#tf$keras$metrics$AUC()
   )
   lba.nn.model %>% keras::fit(
     exp.matrix,
@@ -155,11 +146,12 @@ lbann <- function(formula, data,
 
   # return results
   structure(list(model = lba.nn.model,
-              input.matrix = exp.matrix,
-              output.matrix = resp.matrix,
-              weight.matrix.1 = weight.matrix.1,
-              weight.matrix.2 = weight.matrix.2,
-              importance = summary.data,
-              importance.plot = importance.plot,
-              importance.plot.data = importance_data), class = "lbann")
+                 input.matrix = exp.matrix,
+                 output.matrix = resp.matrix,
+                 weight.matrix.1 = weight.matrix.1,
+                 weight.matrix.2 = weight.matrix.2,
+                 importance = summary.data,
+                 importance.plot = importance.plot,
+                 importance.plot.data = importance_data), class = "lbann")
 }
+
