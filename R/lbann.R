@@ -28,7 +28,7 @@ lbann <- function(formula, data,
   if (!inherits(formula,"formula")) {
     stop("Invalid type of argument: formula!")
   }
-  if (!is.matrix(data) | !is.data.frame(data)) {
+  if (!is.matrix(data) & !is.data.frame(data)) {
     stop("Invalid type of argument: data!")
   }
   if (!is.logical(interaction)) {
