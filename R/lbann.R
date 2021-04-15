@@ -14,6 +14,8 @@
 #' @param epochs the number of epochs or iterations to train the model. The default value is 10. See also “fit.keras.engine.training.Model” in keras.
 #' @param val_split.ratio the ratio between the number of observations in the training set and validation set. The default value is 0.2.
 #' @param lr learning rate. The default value is 0.01
+#' @param K the number of predefined clusters. The value is recommended to be the same as in LBA
+#' @param seed the seed for LBANN-Kmeans approach to achieve reproducible results
 #' @keywords LBA-NN model
 #' @return a list of the model, input matrix, output matrix, weight matrices, importance table and importance plot
 #' @examples
@@ -24,7 +26,8 @@ lbann <- function(formula, data,
                   interaction = F,
                   num.layer, activation.1= "linear", activation.2 = "linear",
                   loss.fun = "mse", epochs = 10, val_split.ratio = 0.2,
-                  lr = 0.01) {
+                  lr = 0.01,
+                  K = NA, seed = 1) {
   if (!inherits(formula,"formula")) {
     stop("Invalid type of argument: formula!")
   }
@@ -54,6 +57,12 @@ lbann <- function(formula, data,
   }
   if (!is.numeric(lr)) {
     stop("Invalid type of argument: lr! lr can only accept a numerical value!")
+  }
+  if (!is.numeric(K) & !is.na(K)) {
+    stop("Invalid type of argument: K! K can only accept a numerical value!")
+  }
+  if (!is.numeric(seed)) {
+    stop("Invalid type of argument: seed! seed can only accept a numerical value!")
   }
 
   aux.form <- strsplit(as.character(formula), split = "~")
@@ -151,16 +160,53 @@ lbann <- function(formula, data,
     }
   }
 
+  ### LBANN-Kmeans Approach
+  if (!is.na(K)) {
+    set.seed(seed)
+    pc <- prcomp(t(summary.data), center = T, scale. = T)
+    data <- data.frame(obsnames=row.names(pc$x), pc$x,cluster = kmeans(t(summary.data), centers = K)$cluster)
+    biplot <- ggplot(data, aes_string(x="PC1", y="PC2")) +
+      geom_point(aes( color= as.factor(sapply(1:length(cluster), function(x) {paste("Cluster", cluster[x])})) ), alpha = 0.8) +
+      geom_text(hjust=-0.3, vjust=0, size = 3, aes(label=obsnames,
+                                                   color= as.factor(sapply(1:length(cluster), function(x) {paste("Cluster", cluster[x])}))) )+
+      scale_color_discrete(name = "Clusters", labels = sapply(1:max(data$cluster), function(x) {paste("Cluster", x)})) +
+      guides(color = guide_legend(title="Clusters") )
+    biplot <- biplot + geom_hline(aes(yintercept=0), size=.2) + geom_vline(aes(xintercept = 0), size=.2)
+    datapc <- data.frame(varnames=rownames(pc$rotation), pc$rotation)
+    mult <- min(
+      (max(data[,"PC2"]) - min(data[,"PC2"])/(max(datapc[,"PC2"])-min(datapc[,"PC2"]))),
+      (max(data[,"PC1"]) - min(data[,"PC1"])/(max(datapc[,"PC1"])-min(datapc[,"PC1"])))
+    )
+    datapc <- transform(datapc,
+                        v1 = .7 * mult * (get("PC1")),
+                        v2 = .7 * mult * (get("PC2"))
+    )
+    biplot <- biplot + coord_equal() + geom_text(data=datapc, aes(x=v1, y=v2, label=varnames), size = 3, vjust=-0.8, alpha = 0.8, color = "black")#F90563
+    biplot <- biplot + geom_point(data = datapc, aes(x = v1, y = v2), alpha = 0.8, shape = 25, color = "black", fill = "black")
+    biplot <- biplot + theme_bw()
+  }
 
 
   # return results
-  structure(list(model = lba.nn.model,
-                 input.matrix = exp.matrix,
-                 output.matrix = resp.matrix,
-                 weight.matrix.1 = weight.matrix.1,
-                 weight.matrix.2 = weight.matrix.2,
-                 importance = summary.data,
-                 importance.plot = importance.plot,
-                 importance.plot.data = importance_data), class = "lbann")
+  if (is.na(K)) {
+    structure(list(model = lba.nn.model,
+                   input.matrix = exp.matrix,
+                   output.matrix = resp.matrix,
+                   weight.matrix.1 = weight.matrix.1,
+                   weight.matrix.2 = weight.matrix.2,
+                   importance = summary.data,
+                   importance.plot = importance.plot,
+                   importance.plot.data = importance_data), class = "lbann")
+  } else {
+    structure(list(model = lba.nn.model,
+                   input.matrix = exp.matrix,
+                   output.matrix = resp.matrix,
+                   weight.matrix.1 = weight.matrix.1,
+                   weight.matrix.2 = weight.matrix.2,
+                   importance = summary.data,
+                   importance.plot = importance.plot,
+                   importance.plot.data = importance_data,
+                   biplot = biplot), class = "lbann")
+  }
 }
 
