@@ -150,21 +150,21 @@ lbann <- function(formula, data,
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
                    legend.position = "none")
 
-  summary.data <- matrix(NA, nrow = length(name.cat.exp), ncol = length(name.cat.resp))
-  rownames(summary.data) <- name.cat.exp
-  colnames(summary.data) <- name.cat.resp
+  summary.data <- matrix(NA, nrow = length(name.cat.resp), ncol = length(name.cat.exp))
+  colnames(summary.data) <- name.cat.exp
+  rownames(summary.data) <- name.cat.resp
 
   for (i in 1:sum(num.cat.exp)) {
     for (j in 1:length(name.cat.resp)){
-      summary.data[i,j] <- sum(weight.matrix.1[i,] * weight.matrix.2[,j])
+      summary.data[j,i] <- sum(weight.matrix.1[i,] * weight.matrix.2[,j])
     }
   }
 
   ### LBANN-Kmeans Approach
   if (!is.na(K)) {
     set.seed(seed)
-    pc <- prcomp(t(summary.data), center = T, scale. = T)
-    data <- data.frame(obsnames=row.names(pc$x), pc$x,cluster = kmeans(t(summary.data), centers = K)$cluster)
+    pc <- prcomp(summary.data, center = T, scale. = T)
+    data <- data.frame(obsnames=row.names(pc$x), pc$x,cluster = kmeans(summary.data, centers = K)$cluster)
     biplot <- ggplot(data, aes_string(x="PC1", y="PC2")) +
       geom_point(aes( color= as.factor(sapply(1:length(cluster), function(x) {paste("Cluster", cluster[x])})) ), alpha = 0.8) +
       geom_text(hjust=-0.3, vjust=0, size = 3, aes(label=obsnames,
