@@ -7,7 +7,7 @@
 #' @import tensorflow
 #' @param formula an object of class "formula" or one that can be coerced to that class with a response variable.
 #' @param data a data frame to interpret the variables named in the formula.
-#' @param num.layer the number of neurons in the hidden layer. The default value is NULL.
+#' @param num.neurons the number of neurons in the hidden layer. The default value is NULL.
 #' @param activation.1 the activation function in the hidden layer, one of “linear” or “relu”. If the value is missing, “linear” activation is used.
 #' @param activation.2 the activation function in the output layer, one of “linear”, “relu” or “softmax”. If the value is missing, “linear” activation is used.
 #' @param loss.function objective function to represent the error. If the value is missing, “mse” is used.
@@ -24,7 +24,7 @@
 
 lbann <- function(formula, data,
                   interaction = F,
-                  num.layer, activation.1= "linear", activation.2 = "linear",
+                  num.neurons, activation.1= "linear", activation.2 = "linear",
                   loss.fun = "mse", epochs = 10, val_split.ratio = 0.2,
                   lr = 0.01,
                   K = NA, seed = 1) {
@@ -37,8 +37,8 @@ lbann <- function(formula, data,
   if (!is.logical(interaction)) {
     stop("Invalid type of argument: interaction!")
   }
-  if (!is.numeric(num.layer)) {
-    stop("Invalid type of argument: num.layer! num.layer can only accept a numerical value!")
+  if (!is.numeric(num.neurons)) {
+    stop("Invalid type of argument: num.neurons! num.neurons can only accept a numerical value!")
   }
   if (!activation.1 %in% c("linear", "relu", "softmax")) {
     stop("Invalid value of activation.1!")
@@ -104,7 +104,7 @@ lbann <- function(formula, data,
   # , bias_constraint = keras::constraint_maxnorm(0), kernel_constraint = keras::constraint_nonneg()
   input.layer <- keras::layer_input(shape=c(sum(num.cat.exp)))
   layers <- input.layer %>%
-    keras::layer_dense(units = num.layer, activation = activation.1) %>%
+    keras::layer_dense(units = num.neurons, activation = activation.1) %>%
     keras::layer_dense(units = length(name.cat.resp), activation = activation.2)
   # define the neural network model
   lba.nn.model <- keras::keras_model(inputs = input.layer, outputs = layers)
